@@ -8,14 +8,25 @@ import { StatusBar } from '@ionic-native/status-bar/ngx';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
+import { ModalBaseComponent } from 'src/components/modal-base/modal-base.component';
+import { QuditDetailsComponent } from './simulate/qudit-details/qudit-details.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
-  declarations: [AppComponent],
-  entryComponents: [],
+  declarations: [
+    AppComponent,
+    ModalBaseComponent,
+    QuditDetailsComponent
+  ],
+  entryComponents: [
+    ModalBaseComponent,
+    QuditDetailsComponent
+  ],
   imports: [
     BrowserModule,
     IonicModule.forRoot(),
-    AppRoutingModule
+    AppRoutingModule,
+    FormsModule
   ],
   providers: [
     StatusBar,

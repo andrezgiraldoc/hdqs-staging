@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Set amplitudes</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <div class="coefficients-qudit-table">
+    <ion-grid>
+      <ion-row class="header-item">
+        <ion-col size-xs="3"></ion-col>
+        <ion-col class="index-label-col"><span>Coefficient</span></ion-col>
+        <ion-col class="real-label-col"><span>Real</span></ion-col>
+        <ion-col class="imaginary-label-col"><span>Imaginary</span></ion-col>
+        <ion-col size-xs="3"></ion-col>
+      </ion-row>
+      <ion-row *ngFor="let coefficient of quditCoefficients; let i = index" class="body-item">
+        <ion-col size-xs="3"></ion-col>
+        <ion-col class="index-value-col">{{ i }}</ion-col>
+        <ion-col class="coefficient-col">
+          <ion-input type="text" [(ngModel)]="quditCoefficients[i][0]"></ion-input>
+        </ion-col>
+        <ion-col class="coefficient-col right-coefficient">
+          <ion-input type="text" [(ngModel)]="quditCoefficients[i][1]"></ion-input>
+        </ion-col>
+        <ion-col size-xs="3"></ion-col>
+      </ion-row>
+      <br>
+      <ion-row>
+        <ion-col size-xs="4" class="ion-align-self-center">
+        </ion-col>
+        <ion-col size-xs="4" class="toggle-button-col ion-align-self-center">
+          <ion-button (click)="saveCoefficients()">Guardar</ion-button>
+        </ion-col>
+        <ion-col size-xs="4" class="ion-align-self-center"></ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</ion-content>

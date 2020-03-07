@@ -1,0 +1,146 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Simulate</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Simulate</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <div class="json-toggle-container">
+    <ion-grid>
+      <ion-row>
+        <ion-col size-xs="auto" class="simulator-header-label ion-align-self-center">
+          <span>Using JSON</span>
+        </ion-col>
+        <ion-col class="ion-align-self-center">
+          <ion-toggle [(ngModel)]="usingJSON"></ion-toggle>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+  <div class="simulator-header-input">
+    <ion-grid>
+      <ion-row>
+        <ion-col size-xs="6" class="simulator-header-label ion-align-self-center">
+          <span>Select number of qudits: </span>
+        </ion-col>
+        <ion-col size-xs="auto" class="ion-align-self-center">
+          <ion-input type="number" min="0" max="20" value="2" [(ngModel)]="quditsNumber"></ion-input>
+        </ion-col>
+        <ion-col></ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size-xs="6" class="simulator-header-label ion-align-self-center">
+          <span>Select number of dimensions per qudit: </span>
+        </ion-col>
+        <ion-col size-xs="auto" class="ion-align-self-center">
+          <ion-input type="number" min="2" max="20" value="2" [(ngModel)]="quditsDimension"></ion-input>
+        </ion-col>
+        <ion-col></ion-col>
+      </ion-row>
+      <br>
+      <ion-row>
+        <ion-col size-xs="4" class="ion-align-self-center">
+        </ion-col>
+        <ion-col size-xs="4" class="toggle-button-col ion-align-self-center">
+          <ion-button (click)="showQudits()">Next</ion-button>
+        </ion-col>
+        <ion-col size-xs="4" class="ion-align-self-center"></ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+  <div *ngIf="quditsInfo && quditsInfo.length > 0" class="simulator-qudit-table">
+    <ion-grid>
+      <ion-row class="header-item">
+        <ion-col size-xs="3"></ion-col>
+        <ion-col class="index-label-col"><span>Index</span></ion-col>
+        <ion-col class="type-label-col"><span>Type</span></ion-col>
+        <ion-col class="state-label-col"><span>State</span></ion-col>
+        <ion-col size-xs="3"></ion-col>
+      </ion-row>
+      <ion-row *ngFor="let qudit of quditsInfo; let i = index" class="body-item" (click)="viewDetails(qudit)">
+        <ion-col size-xs="3"></ion-col>
+        <ion-col class="index-value-col">{{ i }}</ion-col>
+        <ion-col class="type-value-col">{{ qudit.type }}</ion-col>
+        <ion-col class="state-value-col">
+          <span class="left-ket">|</span> <span *ngIf="qudit.state !== 'Psi'"> {{ qudit.state }} </span> <span *ngIf="qudit.state === 'Psi'"> &Psi; </span> <i class="material-icons">⟩</i>
+        </ion-col>
+        <ion-col size-xs="3"></ion-col>
+      </ion-row>
+      <br>
+      <ion-row>
+        <ion-col size-xs="4" class="ion-align-self-center">
+        </ion-col>
+        <ion-col size-xs="4" class="toggle-button-col ion-align-self-center">
+          <ion-button (click)="showCircuit()">Next</ion-button>
+        </ion-col>
+        <ion-col size-xs="4" class="ion-align-self-center"></ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+  <div *ngIf="circuitIsShown" class="simulator-circuit-table">
+    <ion-grid>      
+      <ion-row class="header-item">
+        <ion-col size-xs="2"></ion-col>
+        <ion-col size-xs="1" class="index-label-col"><span>Step</span></ion-col>
+        <ion-col size-xs="2"class="function-label-col"><span>Apply</span></ion-col>
+        <ion-col size-xs="5" class="gates-label-col"><span>Operations string</span></ion-col>
+        <ion-col size-xs="2"></ion-col>
+      </ion-row>
+      <ion-row *ngFor="let step of circuit; let i = index" class="body-item">
+        <ion-col size-xs="2"></ion-col>
+        <ion-col size-xs="1" class="index-value-col">{{ i + 1 }}</ion-col>
+        <ion-col size-xs="2" class="function-value-col">
+          <ion-select [(ngModel)]="step.apply" multiple="false" (ionChange)="applyChanges($event, i)" [ngClass]="{'function-input-text': step.apply === 'function', 'gates-input-text': step.apply === 'gates' }" appNoArrow>
+            <ion-select-option value="gates">Gates</ion-select-option>
+            <ion-select-option value="function">Function</ion-select-option>
+          </ion-select>
+        </ion-col>
+        <ion-col size-xs="5" class="gates-value-col">
+          <ion-input type="text" [(ngModel)]="step.gates" [ngClass]="{'function-input-text': step.apply === 'function', 'gates-input-text': step.apply === 'gates' }" (click)="onStep(i)"></ion-input>
+        </ion-col>
+        <ion-col size-xs="2"></ion-col>
+      </ion-row>
+      <ion-row *ngIf="showGates" class="gates-row">
+        <ion-col>
+          <span class="gate-label" (click)="insertGate('I')">I</span>
+          <span class="gate-label" (click)="insertGate('W')">W</span>
+          <span class="gate-label" (click)="insertGate('X')">X<sup> m</sup></span>
+          <span class="gate-label" (click)="insertGate('Z')">Z<sup> m</sup></span>
+          <span class="gate-label" (click)="insertGate('GQFT')">GQFT</span>
+          <span class="gate-label" (click)="insertGate('GQFT&dagger;')">GQFT<sup> &dagger;</sup></span>
+          <span class="gate-label" (click)="insertGate('&bull;')">&bull;</span>
+          <span class="gate-label" (click)="insertGate('U')">U<sup> k</sup></span>
+        </ion-col>
+      </ion-row>
+      <ion-row *ngIf="showFunctions" class="functions-row">
+        <ion-col>
+          <span class="function-label" (click)="insertFunction('Get amplitudes matrix')">Amps</span>
+          <span class="function-label" (click)="insertFunction('Get density matrix')">Density</span>
+          <span class="function-label" (click)="insertFunction('Get probabilities vector')">Chance</span>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size-xs="5"></ion-col>
+        <ion-col class="add-step-button-col ion-align-self-center" size-xs="5">
+          <ion-button *ngIf="circuit.length > 1" (click)="removeStep()">Remove step</ion-button>
+          <ion-button (click)="addStep()">Add step</ion-button>
+        </ion-col>
+        <ion-col size-xs="2"></ion-col>
+      </ion-row>
+      <br>
+      <ion-row>
+        <ion-col size-xs="4" class="ion-align-self-center">
+        </ion-col>
+        <ion-col size-xs="4" class="toggle-button-col ion-align-self-center">
+          <ion-button (click)="showCircuit()">Send</ion-button>
+        </ion-col>
+        <ion-col size-xs="4" class="ion-align-self-center"></ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</ion-content>

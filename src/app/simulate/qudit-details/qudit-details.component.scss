@@ -1,0 +1,54 @@
+.coefficients-qudit-table {
+  overflow: scroll;
+  margin: 60px 20px 20px 20px;
+  ion-col {
+    text-align: center;
+  }
+  .header-item {
+    ion-col {
+      color: #556582;
+    }
+  }
+  .index-label-col {
+    
+  }
+  .real-label-col {
+    
+  }
+  .imaginary-label-col {
+    
+  }
+  .index-value-col {
+    border-radius: 2px;
+    border-top: solid 1px #e5ecfb;
+    border-left: solid 1px #e5ecfb;
+    border-bottom: solid 1px #e5ecfb;
+    margin-top: 10px;
+    padding: 25px 10px 10px 10px;
+  }
+  .coefficient-col {
+    cursor: pointer;
+    border-radius: 2px;
+    border-top: solid 1px #e5ecfb;
+    border-bottom: solid 1px #e5ecfb;
+    margin-top: 10px;
+    padding: 15px 10px 10px 10px;
+    &.right-coefficient {
+      border-right: solid 1px #e5ecfb;
+    }
+    ion-input {
+      background-color: aliceblue;
+      max-width: 80px;
+      text-align: center;
+      border-radius: 10px;
+      --padding-end: 10px;
+    }
+  }
+  .toggle-button-col {
+    text-align: center;
+    margin-top: 30px;
+    ion-button {
+      text-transform: none;
+    }
+  }
+}
