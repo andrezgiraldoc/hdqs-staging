@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular';
 import { ModalBaseComponent } from 'src/components/modal-base/modal-base.component';
 import { QuditDetailsComponent } from './qudit-details/qudit-details.component';
+import { GateDetailsComponent } from './gate-details/gate-details.component';
 
 @Component({
   selector: 'app-simulate',
@@ -19,6 +20,10 @@ export class SimulatePage implements OnInit {
   public currentStep = 0;
   public showGates = true;
   public showFunctions = false;
+  public finalCircuit: any;
+  public finalCircuitUsingJSON: any;
+  public showFinalJSON = false;
+  public showQuditsActived = false;
 
   constructor(
     public modalController: ModalController
@@ -28,6 +33,7 @@ export class SimulatePage implements OnInit {
   }
 
   showQudits() {
+    this.showQuditsActived = true;
     this.quditsInfo = [];
     const coefficients = [];
     coefficients.push([1, 0]);
@@ -41,6 +47,7 @@ export class SimulatePage implements OnInit {
         coefficients
       });
     }
+    this.showCircuit();
   }
 
   viewDetails(qudit) {
@@ -105,7 +112,6 @@ export class SimulatePage implements OnInit {
   }
 
   onStep(i) {
-    console.log('I am in step: ', i);
     this.currentStep = i;
     if (this.circuit[i].apply === 'function') {
       this.showFunctions = true;
@@ -117,8 +123,8 @@ export class SimulatePage implements OnInit {
   }
 
   applyChanges(type, i) {
-    console.log('Change: ', type);
     this.circuit[i].gates = '';
+    this.currentStep = i;
     if (type.detail.value === 'function') {
       this.showFunctions = true;
       this.showGates = false;
@@ -129,12 +135,108 @@ export class SimulatePage implements OnInit {
   }
 
   insertGate(gate) {
-    this.circuit[this.currentStep].gates = (this.circuit[this.currentStep].gates === '') ?
-      gate : this.circuit[this.currentStep].gates + ';' + gate;
+    if (gate === 'W' || gate === 'X' || gate === 'Z' || gate === 'GQFT' || gate === 'GQFT†' || gate === 'U') {
+      this.presentGateModal(gate).then();
+    } else {
+      this.circuit[this.currentStep].gates = (this.circuit[this.currentStep].gates === '') ?
+        gate : this.circuit[this.currentStep].gates + ';' + gate;
+    }
+  }
+
+  async presentGateModal(type) {
+    const modal = await this.modalController.create({
+      component: ModalBaseComponent,
+      cssClass: 'gate-details-modal',
+      componentProps: {
+        rootPage: GateDetailsComponent,
+        modalData: {
+          type
+        }
+      }
+    });
+    modal.onDidDismiss()
+      .then((data) => {
+        if (data.data !== undefined) {
+          let gate;
+          if (type === 'W') {
+            gate = 'W(' + data.data.pParameter + ',' + data.data.qParameter + ')';
+          } else if (type === 'X') {
+            gate = 'X^' + data.data.mParameter;
+          } else if (type === 'Z') {
+            gate = 'Z^' + data.data.mParameter;
+          } else if (type === 'GQFT') {
+            gate = 'GQFT(' + data.data.nParameter + ')';
+          } else if (type === 'GQFT†') {
+            gate = 'GQFT†(' + data.data.nParameter + ')';
+          } else if (type === 'U') {
+            gate = 'U^' + data.data.kParameter;
+          }
+          this.circuit[this.currentStep].gates = (this.circuit[this.currentStep].gates === '') ?
+            gate : this.circuit[this.currentStep].gates + ';' + gate;
+        }
+    });
+    return await modal.present();
   }
 
   insertFunction(gate) {
     this.circuit[this.currentStep].gates = gate;
+  }
+
+  createJSON() {
+    const coefficients = [];
+    const circuitJSON = {
+      qudits: 0,
+      dimensions: 0,
+      qRegister: coefficients,
+      steps: []
+    };
+    circuitJSON.qudits = this.quditsNumber;
+    circuitJSON.dimensions = this.quditsDimension;
+    for (const [i, qudit] of this.quditsInfo.entries()) {
+      const quditCoefficients = [];
+      for (const [j, coefficientsGroup] of qudit.coefficients.entries()) {
+        quditCoefficients.push('(' + coefficientsGroup[0] + ',' + coefficientsGroup[1] + ')');
+      }
+      coefficients.push(quditCoefficients);
+    }
+    circuitJSON.qRegister = coefficients;
+    for (const [i, step] of this.circuit.entries()) {
+      if (step.apply === 'gates') {
+        circuitJSON.steps.push({
+          applyGates: step.gates
+        });
+      } else if (step.apply === 'function') {
+        circuitJSON.steps.push({
+          applyFunction: step.gates
+        });
+      }
+    }
+    this.finalCircuit = JSON.stringify(circuitJSON, null, 2);
+    this.showFinalJSON = true;
+  }
+
+  usingJSONChanged(value) {
+    if (value.detail.checked) {
+      this.usingJSON = true;
+    } else {
+      this.usingJSON = false;
+    }
+  }
+
+  editCircuit() {
+    this.showFinalJSON = false;
+  }
+
+  resetCircuit() {
+    if (this.usingJSON) {
+      this.finalCircuitUsingJSON = '';
+    } else {
+      this.showQuditsActived = false;
+    }
+  }
+
+  confirmCircuit() {
+    console.log('send this circuit: ', this.finalCircuit);
   }
 
 }

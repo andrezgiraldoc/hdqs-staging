@@ -11,16 +11,19 @@ import { AppRoutingModule } from './app-routing.module';
 import { ModalBaseComponent } from 'src/components/modal-base/modal-base.component';
 import { QuditDetailsComponent } from './simulate/qudit-details/qudit-details.component';
 import { FormsModule } from '@angular/forms';
+import { GateDetailsComponent } from './simulate/gate-details/gate-details.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ModalBaseComponent,
-    QuditDetailsComponent
+    QuditDetailsComponent,
+    GateDetailsComponent
   ],
   entryComponents: [
     ModalBaseComponent,
-    QuditDetailsComponent
+    QuditDetailsComponent,
+    GateDetailsComponent
   ],
   imports: [
     BrowserModule,

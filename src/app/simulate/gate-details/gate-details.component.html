@@ -1,0 +1,80 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Set 
+      <span *ngIf="gateType === 'W'">Weyl operator</span>
+      <span *ngIf="gateType === 'X'">X gate</span>
+      <span *ngIf="gateType === 'Z'">Z gate</span>
+      <span *ngIf="gateType === 'GQFT'">GQFT gate</span>
+      <span *ngIf="gateType === 'GQFT&dagger;'">GQFT&dagger; gate</span>
+      <span *ngIf="gateType === 'U'">U gate</span>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <div class="simulator-header-input">
+    <div class="gate-subtitle">
+      <span *ngIf="gateType === 'W'">Select params for W(p,q)</span>
+      <span *ngIf="gateType === 'X'">Select params for X<sup> m</sup></span>
+      <span *ngIf="gateType === 'Z'">Select params for Z<sup> m</sup></span>
+      <span *ngIf="gateType === 'GQFT'">Select params for GQFT(n)</span>
+      <span *ngIf="gateType === 'GQFT&dagger;'">Select params for GQFT&dagger;(n)</span>
+      <span *ngIf="gateType === 'U'">Select params for U<sup> k</sup></span>
+    </div>
+    <ion-grid>
+      <ion-row *ngIf="gateType === 'W'">
+        <ion-col size-xs="3" class="simulator-header-label ion-align-self-center">
+          <span>p </span>
+        </ion-col>
+        <ion-col size-xs="auto" class="ion-align-self-center">
+          <ion-input type="number" min="0" max="20" value="0" [(ngModel)]="pParameter"></ion-input>
+        </ion-col>
+        <ion-col></ion-col>
+      </ion-row>
+      <ion-row *ngIf="gateType === 'W'">
+        <ion-col size-xs="3" class="simulator-header-label ion-align-self-center">
+          <span>q </span>
+        </ion-col>
+        <ion-col size-xs="auto" class="ion-align-self-center">
+          <ion-input type="number" min="0" max="20" value="0" [(ngModel)]="qParameter"></ion-input>
+        </ion-col>
+        <ion-col></ion-col>
+      </ion-row>
+      <ion-row *ngIf="gateType === 'X' || gateType === 'Z'">
+        <ion-col size-xs="3" class="simulator-header-label ion-align-self-center">
+          <span>m </span>
+        </ion-col>
+        <ion-col size-xs="auto" class="ion-align-self-center">
+          <ion-input type="number" min="0" max="20" value="0" [(ngModel)]="mParameter"></ion-input>
+        </ion-col>
+        <ion-col></ion-col>
+      </ion-row>
+      <ion-row *ngIf="gateType === 'GQFT' || gateType === 'GQFT&dagger;'">
+        <ion-col size-xs="3" class="simulator-header-label ion-align-self-center">
+          <span>n </span>
+        </ion-col>
+        <ion-col size-xs="auto" class="ion-align-self-center">
+          <ion-input type="number" min="0" max="20" value="0" [(ngModel)]="nParameter"></ion-input>
+        </ion-col>
+        <ion-col></ion-col>
+      </ion-row>
+      <ion-row *ngIf="gateType === 'U'">
+        <ion-col size-xs="3" class="simulator-header-label ion-align-self-center">
+          <span>k </span>
+        </ion-col>
+        <ion-col size-xs="auto" class="ion-align-self-center">
+          <ion-input type="number" min="0" max="20" value="0" [(ngModel)]="kParameter"></ion-input>
+        </ion-col>
+        <ion-col></ion-col>
+      </ion-row>
+      <br>
+      <ion-row>
+        <ion-col size-xs="4" class="ion-align-self-center">
+        </ion-col>
+        <ion-col size-xs="4" class="toggle-button-col ion-align-self-center">
+          <ion-button (click)="saveParameters()">Save</ion-button>
+        </ion-col>
+        <ion-col size-xs="4" class="ion-align-self-center"></ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</ion-content>

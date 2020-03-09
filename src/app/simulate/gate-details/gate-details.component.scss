@@ -1,0 +1,34 @@
+ion-content {
+  .simulator-header-input {
+    margin: 20px;
+    .gate-subtitle {
+      span {
+        font-size: 16px;
+        color: #556582;
+      }
+    }
+    ion-grid {
+      margin-top: 15px;
+      ion-row {
+        min-width: 400px;
+        .simulator-header-label {
+          text-align: right;
+          font-size: 16px;
+          color: #556582;
+        }
+        .toggle-button-col {
+          text-align: center;
+          ion-button {
+            text-transform: none;
+          }
+        }
+        ion-input {
+          background-color: aliceblue;
+          max-width: 80px;
+          text-align: center;
+          border-radius: 10px;
+        }
+      }
+    }
+  }
+}
