@@ -3,6 +3,9 @@ import { ModalController } from '@ionic/angular';
 import { ModalBaseComponent } from 'src/components/modal-base/modal-base.component';
 import { QuditDetailsComponent } from './qudit-details/qudit-details.component';
 import { GateDetailsComponent } from './gate-details/gate-details.component';
+import { CircuitService } from '../circuit.service';
+import { NavigationExtras, Router } from '@angular/router';
+import { LoadingService } from '../loading.service';
 
 @Component({
   selector: 'app-simulate',
@@ -26,7 +29,10 @@ export class SimulatePage implements OnInit {
   public showQuditsActived = false;
 
   constructor(
-    public modalController: ModalController
+    public modalController: ModalController,
+    public circuitService: CircuitService,
+    public router: Router,
+    public loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -236,7 +242,25 @@ export class SimulatePage implements OnInit {
   }
 
   confirmCircuit() {
-    console.log('send this circuit: ', this.finalCircuit);
+    this.loadingService.present().then(() => {
+      const circuitData = this.usingJSON ? this.finalCircuitUsingJSON : this.finalCircuit;
+      this.circuitService.create(circuitData).subscribe(
+        (response) => {
+          console.log('response: ', response);
+          const navigationExtras: NavigationExtras = {
+            state: {
+              response
+            }
+          };
+          this.loadingService.dismiss();
+          this.router.navigate(['/results'], navigationExtras);
+        },
+        (error) => {
+          this.loadingService.dismiss();
+          console.log('error: ', error);
+        }
+      );
+    });
   }
 
 }

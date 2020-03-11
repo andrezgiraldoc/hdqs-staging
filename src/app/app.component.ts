@@ -21,6 +21,11 @@ export class AppComponent implements OnInit {
       title: 'Instructions',
       url: '/instructions',
       icon: 'document-text'
+    },
+    {
+      title: 'Results',
+      url: '/results',
+      icon: 'stats-chart'
     }
   ];
   public labels = [

@@ -12,6 +12,7 @@ import { ModalBaseComponent } from 'src/components/modal-base/modal-base.compone
 import { QuditDetailsComponent } from './simulate/qudit-details/qudit-details.component';
 import { FormsModule } from '@angular/forms';
 import { GateDetailsComponent } from './simulate/gate-details/gate-details.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { GateDetailsComponent } from './simulate/gate-details/gate-details.compo
     BrowserModule,
     IonicModule.forRoot(),
     AppRoutingModule,
-    FormsModule
+    FormsModule,
+    HttpClientModule
   ],
   providers: [
     StatusBar,

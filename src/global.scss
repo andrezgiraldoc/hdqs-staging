@@ -48,3 +48,23 @@
     opacity: 0.8 !important;
   }
 }
+
+.d3-tip {
+  font-family: Verdana;
+  background: white;
+  padding: 8px;
+  color: black;
+  z-index: 5070;
+  border: 1px solid #00000063;
+  border-radius: 10px;
+  .tip-label {
+    font-weight: bold;
+  }
+}
+
+.material-icons.right-ket {
+  font-family: 'Material Icons' !important;
+  vertical-align: middle;
+  font-size: 20px;
+  margin-bottom: 9px;
+}
