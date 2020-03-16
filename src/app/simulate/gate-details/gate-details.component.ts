@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NavParams, ModalController } from '@ionic/angular';
+import { NavParams, ModalController, AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-gate-details',
@@ -15,10 +15,13 @@ export class GateDetailsComponent implements OnInit {
   public mParameter = 1;
   public nParameter = 1;
   public kParameter = 1;
+  public uGate: string;
+  public uGatePlaceholder = '{{1,0}, {0,-1}, {0,1}, {1,0}}';
 
   constructor(
     public navParams: NavParams,
-    public modalController: ModalController
+    public modalController: ModalController,
+    private alertController: AlertController
   ) {
     this.gateData = navParams.data;
     this.gateType = JSON.parse(JSON.stringify(this.gateData.type));
@@ -26,8 +29,18 @@ export class GateDetailsComponent implements OnInit {
 
   ngOnInit() {}
 
+  async presentAlert() {
+    const alert = await this.alertController.create({
+      header: 'Obligatory field',
+      message: 'Associated U gate cannot be empty',
+      buttons: ['OK']
+    });
+    await alert.present();
+  }
+
   saveParameters() {
     let gatesParameters;
+    let canSaveData = true;
     if (this.gateType === 'W') {
       gatesParameters = {
         pParameter: this.pParameter,
@@ -42,11 +55,20 @@ export class GateDetailsComponent implements OnInit {
         nParameter: this.nParameter
       };
     } else if (this.gateType === 'U') {
-      gatesParameters = {
-        kParameter: this.kParameter
-      };
+      if (this.uGate === undefined) {
+        canSaveData = false;
+      } else {
+        gatesParameters = {
+          uGate: this.uGate,
+          kParameter: this.kParameter
+        };
+      }
     }
-    this.modalController.dismiss(gatesParameters);
+    if (canSaveData) {
+      this.modalController.dismiss(gatesParameters);
+    } else {
+      this.presentAlert();
+    }
   }
 
 }

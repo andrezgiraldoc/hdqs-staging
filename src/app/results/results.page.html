@@ -4,8 +4,19 @@
   </ion-toolbar>
 </ion-header>
 <ion-content [fullscreen]="true">
-  <div class="result-table">
-    <h2>Amplitude Matrix</h2>
-    <div id="ampMatrix"></div>
+  <div id="resultsTable">
+  </div>
+  <br>
+  <div class="new-simulation-button-container">
+    <ion-grid>
+      <ion-row>
+        <ion-col size-xs="4" class="ion-align-self-center">
+        </ion-col>
+        <ion-col size-xs="4" class="toggle-button-col ion-align-self-center">
+          <ion-button (click)="newSimulation()">New simulation</ion-button>
+        </ion-col>
+        <ion-col size-xs="4" class="ion-align-self-center"></ion-col>
+      </ion-row>
+    </ion-grid>
   </div>
 </ion-content>

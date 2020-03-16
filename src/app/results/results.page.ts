@@ -1,12 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import * as d3Global from 'd3';
 import * as d3 from 'd3-selection';
 import * as d3Scale from 'd3-scale';
-import * as d3Array from 'd3-array';
-import * as d3Axis from 'd3-axis';
-import * as d3Shape from 'd3-shape';
-import * as d3Dsv from 'd3-dsv';
 import d3Tip from 'd3-tip';
 
 @Component({
@@ -30,53 +25,89 @@ export class ResultsPage implements OnInit {
     private route: ActivatedRoute,
     private router: Router
   ) {
-    // this.route.queryParams.subscribe(
-    //   () => {
-    //     if (this.router.getCurrentNavigation().extras.state) {
-    //       this.circuitResult = this.router.getCurrentNavigation().extras.state.response;
-    //       console.log('this.circuitResult: ', this.circuitResult);
-    //     }
-    //   },
-    //   () => {
-    //     console.log('No results');
-    //   }
-    // );
-    this.circuitResult = {
-      // step1: '(0,0);(0,0);(0.57735,0);(0,0);(0,0);(0.57735,0);(0,0);(0,0);(0.57735,0)'
-      step1: '(-0.09567,-0);(0.09567,0);(-0.23097,0.35355);(0.23097,0.35355);(-0.23097,0);(0.23097,0);(-0.09567,0);(0.09567,-0);(-0.09567,0);(0.09567,0);(-0.23097,0.35355);(0.23097,0.35355);(-0.23097,0);(0.23097,0);(-0.09567,0);(0.09567,0)'
-    };
-    this.quditsNumber = 4;
-    this.quditDimensions = 2;
+    this.route.queryParams.subscribe(
+      () => {
+        if (this.router.getCurrentNavigation().extras.state) {
+          const jsonResult = this.router.getCurrentNavigation().extras.state.response;
+          this.quditsNumber = this.router.getCurrentNavigation().extras.state.quditsNumber;
+          this.quditDimensions = this.router.getCurrentNavigation().extras.state.quditDimensions;
+          for (const [i, stepResult] of jsonResult.result.entries()) {
+            this.createChart(stepResult);
+          }
+        }
+      },
+      () => {
+        console.log('No results');
+      }
+    );
   }
 
   ngOnInit() {
-    console.log(this.circuitResult);
-    for (const [i, key] of Object.keys(this.circuitResult).entries()) {
-      this.circuitJSONResult[key] = [];
-      for (const [j, value] of this.circuitResult[key].split(';').entries()) {
-        this.stepLength = this.circuitResult[key].split(';').length;
-        this.circuitJSONResult[key][j] = {};
-        const realValue = parseFloat(value.split(',')[0].replace(/\(/g, ''));
-        const imagValue = parseFloat(value.split(',')[1].replace(/\)/g, ''));
-        this.circuitJSONResult[key][j].realValue = realValue;
-        this.circuitJSONResult[key][j].imagValue = imagValue;
-        this.circuitJSONResult[key][j].amp = Math.pow(realValue, 2) + Math.pow(imagValue, 2);
-        this.circuitJSONResult[key][j].row = (Math.trunc(j / Math.sqrt(this.stepLength))).toString();
-        this.circuitJSONResult[key][j].col = (j % Math.sqrt(this.stepLength)).toString();
-        const changedNumber = j.toString(this.quditDimensions);
-        this.circuitJSONResult[key][j].state = (changedNumber + '').padStart(this.quditsNumber, '0');
-        this.circuitJSONResult[key][j].decimalState = j;
+
+  }
+
+  createChart(stepResult) {
+    const circuitJSONResult = [];
+    for (const [j, value] of stepResult.result.split(';').entries()) {
+      this.stepLength = stepResult.result.split(';').length;
+      circuitJSONResult[j] = {};
+      const realValue = parseFloat(value.split(',')[0].replace(/\(/g, ''));
+      const imagValue = parseFloat(value.split(',')[1].replace(/\)/g, ''));
+      circuitJSONResult[j].realValue = realValue;
+      circuitJSONResult[j].imagValue = imagValue;
+      circuitJSONResult[j].amp = Math.pow(realValue, 2) + Math.pow(imagValue, 2);
+      circuitJSONResult[j].row = (Math.trunc(j / Math.sqrt(this.stepLength))).toString();
+      circuitJSONResult[j].col = (j % Math.sqrt(this.stepLength)).toString();
+      const changedNumber = j.toString(this.quditDimensions);
+      circuitJSONResult[j].state = (changedNumber + '').padStart(this.quditsNumber, '0');
+      circuitJSONResult[j].decimalState = j;
+      circuitJSONResult[j].showPhase = 'true';
+      if (imagValue === 0) {
+        if (realValue === 0) {
+          circuitJSONResult[j].phase = 0;
+          circuitJSONResult[j].showPhase = 'false';
+        } else if (realValue > 0) {
+          circuitJSONResult[j].phase = 0;
+        } else if (realValue < 0) {
+          circuitJSONResult[j].phase = 180;
+        }
+      } else if (imagValue > 0) {
+        if (realValue === 0) {
+          circuitJSONResult[j].phase = 90;
+        } else if (realValue > 0) {
+          circuitJSONResult[j].phase = this.calcAngleDegrees(imagValue, realValue);
+        } else if (realValue < 0) {
+          circuitJSONResult[j].phase = this.calcAngleDegrees(imagValue, realValue);
+        }
+      } else if (imagValue < 0) {
+        if (realValue === 0) {
+          circuitJSONResult[j].phase = 270;
+        } else if (realValue > 0) {
+          circuitJSONResult[j].phase = this.calcAngleDegrees(imagValue, realValue);
+        } else if (realValue < 0) {
+          circuitJSONResult[j].phase = this.calcAngleDegrees(imagValue, realValue);
+        }
       }
     }
-    console.log('this.circuitJSONResult: ', this.circuitJSONResult);
     this.margin = {top: 30, right: 30, bottom: 30, left: 30};
     this.width = 450 - this.margin.left - this.margin.right;
     this.height = 450 - this.margin.top - this.margin.bottom;
-    this.drawHeatMap();
+    this.drawHeatMap(circuitJSONResult, stepResult.step, stepResult.function);
   }
 
-  drawHeatMap() {
-    this.svg = d3.select('#ampMatrix')
+  calcAngleDegrees(x, y) {
+    return Math.atan2(y, x) * 180 / Math.PI;
+  }
+
+  drawHeatMap(circuitJSONResult, stepNumber, stepFunction) {
+    const resultsTableDiv = d3.select('#resultsTable')
+      .append('div')
+        .attr('class', 'stepResult');
+
+    resultsTableDiv.append('h1')
+        .text('Step ' + stepNumber + ': ' + stepFunction);
+
+    this.svg = resultsTableDiv
       .append('svg')
         .attr('width', this.width + this.margin.left + this.margin.right)
         .attr('height', this.height + this.margin.top + this.margin.bottom)
@@ -114,13 +145,14 @@ export class ResultsPage implements OnInit {
         ' (decimal ' + d.decimalState + ')<br>' +
         '<span class="tip-label">val</span>: ' + '<span style="color:green">' + d.realValue + '</span>' + ' + ' +
         '<span style="color:green">' + d.imagValue + '</span> i<br>' +
-        '<span class="tip-label">mag<sup>2</sup></span>:  <span style="color:green">' + d.amp + '</span>';
+        '<span class="tip-label">mag<sup>2</sup></span>:  <span style="color:green">' + d.amp + '</span><br>' +
+        '<span class="tip-label">phase</span>:  <span style="color:green">' + d.phase + '<sup>&deg;</sup></span>';
       });
 
     tip(this.svg.append('g'));
 
     this.svg.selectAll()
-      .data(this.circuitJSONResult['step1'], (d) => d.col + ':' + d.row)
+      .data(circuitJSONResult, (d) => d.col + ':' + d.row)
       .enter()
       .append('rect')
       .attr('class', 'heatmap-rect')
@@ -137,6 +169,10 @@ export class ResultsPage implements OnInit {
       .on('mouseover', tip.show)
       .on('mouseout', tip.hide);
 
+  }
+
+  newSimulation() {
+    this.router.navigate(['/simulate']);
   }
 
 }

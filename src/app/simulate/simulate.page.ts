@@ -109,12 +109,14 @@ export class SimulatePage implements OnInit {
       apply: 'gates',
       gates: ''
     });
+    this.onStep(this.circuit.length - 1);
   }
 
   removeStep() {
     if (this.circuit.length > 1) {
       this.circuit.pop();
     }
+    this.onStep(this.circuit.length - 1);
   }
 
   onStep(i) {
@@ -164,18 +166,40 @@ export class SimulatePage implements OnInit {
       .then((data) => {
         if (data.data !== undefined) {
           let gate;
+          let uGate;
           if (type === 'W') {
             gate = 'W(' + data.data.pParameter + ',' + data.data.qParameter + ')';
           } else if (type === 'X') {
-            gate = 'X^' + data.data.mParameter;
+            if (data.data.mParameter === 1) {
+              gate = 'X';
+            } else if (data.data.mParameter > 1) {
+              gate = 'X^' + data.data.mParameter;
+            }
           } else if (type === 'Z') {
-            gate = 'Z^' + data.data.mParameter;
+            if (data.data.mParameter === 1) {
+              gate = 'Z';
+            } else if (data.data.mParameter > 1) {
+              gate = 'Z^' + data.data.mParameter;
+            }
           } else if (type === 'GQFT') {
             gate = 'GQFT(' + data.data.nParameter + ')';
           } else if (type === 'GQFT†') {
             gate = 'GQFT†(' + data.data.nParameter + ')';
           } else if (type === 'U') {
-            gate = 'U^' + data.data.kParameter;
+            if (data.data.kParameter === 1) {
+              gate = 'U';
+            } else if (data.data.kParameter > 1) {
+              gate = 'U^' + data.data.kParameter;
+            }
+            uGate = data.data.uGate;
+          }
+          if (uGate !== undefined) {
+            if (this.circuit[this.currentStep].hasOwnProperty('uGates')) {
+              this.circuit[this.currentStep].uGates.push(uGate);
+            } else {
+              this.circuit[this.currentStep].uGates = [];
+              this.circuit[this.currentStep].uGates.push(uGate);
+            }
           }
           this.circuit[this.currentStep].gates = (this.circuit[this.currentStep].gates === '') ?
             gate : this.circuit[this.currentStep].gates + ';' + gate;
@@ -208,9 +232,16 @@ export class SimulatePage implements OnInit {
     circuitJSON.qRegister = coefficients;
     for (const [i, step] of this.circuit.entries()) {
       if (step.apply === 'gates') {
-        circuitJSON.steps.push({
-          applyGates: step.gates
-        });
+        if (step.uGates !== undefined) {
+          circuitJSON.steps.push({
+            applyGates: step.gates,
+            uGates: step.uGates
+          });
+        } else {
+          circuitJSON.steps.push({
+            applyGates: step.gates
+          });
+        }
       } else if (step.apply === 'function') {
         circuitJSON.steps.push({
           applyFunction: step.gates
@@ -246,9 +277,10 @@ export class SimulatePage implements OnInit {
       const circuitData = this.usingJSON ? this.finalCircuitUsingJSON : this.finalCircuit;
       this.circuitService.create(circuitData).subscribe(
         (response) => {
-          console.log('response: ', response);
           const navigationExtras: NavigationExtras = {
             state: {
+              quditsNumber: this.quditsNumber,
+              quditDimensions: this.quditsDimension,
               response
             }
           };
