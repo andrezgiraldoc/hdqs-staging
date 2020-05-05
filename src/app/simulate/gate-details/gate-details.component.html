@@ -31,6 +31,7 @@
       <span *ngIf="gateType === 'GQFT'">Select params for GQFT(n)</span>
       <span *ngIf="gateType === 'GQFT&dagger;'">Select params for GQFT&dagger;(n)</span>
       <span *ngIf="gateType === 'U'">Select params for U<sup> k</sup></span>
+      <span *ngIf="gateType === 'Chance'">Select qudit to obtain its probability vector</span>
     </div>
     <ion-grid>
       <div *ngIf="gateType === 'W'">
@@ -84,6 +85,20 @@
           </ion-col>
           <ion-col size-xs="auto" class="ion-align-self-center">
             <ion-input type="number" min="0" max="20" value="0" [(ngModel)]="kParameter"></ion-input>
+          </ion-col>
+          <ion-col></ion-col>
+        </ion-row>
+      </div>
+      <div *ngIf="gateType === 'Chance'">
+        <ion-row>
+          <ion-col size-xs="3" class="simulator-header-label ion-align-self-center">
+            <span>Qudit index </span>
+          </ion-col>
+          <ion-col size-xs="auto" class="ion-align-self-center">
+<!--            <ion-input type="number" min="0" max="20" value="0" [(ngModel)]="kParameter"></ion-input>-->
+            <ion-select [(ngModel)]="quditIndex" multiple="false">
+              <ion-select-option *ngFor="let qudit of quditIndices" [value]="qudit">{{ qudit }}</ion-select-option>
+            </ion-select>
           </ion-col>
           <ion-col></ion-col>
         </ion-row>

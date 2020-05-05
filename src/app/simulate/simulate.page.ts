@@ -151,6 +151,14 @@ export class SimulatePage implements OnInit {
     }
   }
 
+  insertFunction(func) {
+    if (func === 'Chance') {
+      this.presentGateModal(func).then();
+    } else {
+      this.circuit[this.currentStep].gates = func;
+    }
+  }
+
   async presentGateModal(type) {
     const modal = await this.modalController.create({
       component: ModalBaseComponent,
@@ -158,7 +166,8 @@ export class SimulatePage implements OnInit {
       componentProps: {
         rootPage: GateDetailsComponent,
         modalData: {
-          type
+          type,
+          quditsNumber: this.quditsNumber
         }
       }
     });
@@ -167,20 +176,23 @@ export class SimulatePage implements OnInit {
         if (data.data !== undefined) {
           let gate;
           let uGate;
+          let quditIndex;
           if (type === 'W') {
             gate = 'W(' + data.data.pParameter + ',' + data.data.qParameter + ')';
           } else if (type === 'X') {
-            if (data.data.mParameter === 1) {
+/*            if (data.data.mParameter === 1) {
               gate = 'X';
             } else if (data.data.mParameter > 1) {
               gate = 'X^' + data.data.mParameter;
-            }
+            }*/
+            gate = 'X^' + data.data.mParameter;
           } else if (type === 'Z') {
-            if (data.data.mParameter === 1) {
+/*            if (data.data.mParameter === 1) {
               gate = 'Z';
             } else if (data.data.mParameter > 1) {
               gate = 'Z^' + data.data.mParameter;
-            }
+            }*/
+            gate = 'Z^' + data.data.mParameter;
           } else if (type === 'GQFT') {
             gate = 'GQFT(' + data.data.nParameter + ')';
           } else if (type === 'GQFT†') {
@@ -192,6 +204,8 @@ export class SimulatePage implements OnInit {
               gate = 'U^' + data.data.kParameter;
             }
             uGate = data.data.uGate;
+          } else if (type === 'Chance') {
+            quditIndex = data.data.quditIndex;
           }
           if (uGate !== undefined) {
             if (this.circuit[this.currentStep].hasOwnProperty('uGates')) {
@@ -201,15 +215,16 @@ export class SimulatePage implements OnInit {
               this.circuit[this.currentStep].uGates.push(uGate);
             }
           }
-          this.circuit[this.currentStep].gates = (this.circuit[this.currentStep].gates === '') ?
-            gate : this.circuit[this.currentStep].gates + ';' + gate;
+          if (type !== 'Chance') {
+            this.circuit[this.currentStep].gates = (this.circuit[this.currentStep].gates === '') ?
+                gate : this.circuit[this.currentStep].gates + ';' + gate;
+          } else {
+            this.circuit[this.currentStep].gates = type;
+            this.circuit[this.currentStep].quditIndex = quditIndex;
+          }
         }
     });
     return await modal.present();
-  }
-
-  insertFunction(gate) {
-    this.circuit[this.currentStep].gates = gate;
   }
 
   createJSON() {
@@ -243,9 +258,16 @@ export class SimulatePage implements OnInit {
           });
         }
       } else if (step.apply === 'function') {
-        circuitJSON.steps.push({
-          applyFunction: step.gates
-        });
+        if (step.gates === 'Chance') {
+          circuitJSON.steps.push({
+            applyFunction: step.gates,
+            quditIndex: step.quditIndex
+          });
+        } else {
+          circuitJSON.steps.push({
+            applyFunction: step.gates
+          });
+        }
       }
     }
     this.finalCircuit = JSON.stringify(circuitJSON, null, 2);
@@ -279,8 +301,6 @@ export class SimulatePage implements OnInit {
         (response) => {
           const navigationExtras: NavigationExtras = {
             state: {
-              quditsNumber: this.quditsNumber,
-              quditDimensions: this.quditsDimension,
               response
             }
           };

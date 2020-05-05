@@ -10,12 +10,15 @@ export class GateDetailsComponent implements OnInit {
 
   public gateData: any;
   public gateType: any;
+  public quditsNumber: any;
   public pParameter = 0;
   public qParameter = 0;
   public mParameter = 1;
   public nParameter = 1;
   public kParameter = 1;
   public uGate: string;
+  public quditIndex: any;
+  public quditIndices = [];
   public uGatePlaceholder = '{{1,0}, {0,-1}, {0,1}, {1,0}}';
 
   constructor(
@@ -25,6 +28,9 @@ export class GateDetailsComponent implements OnInit {
   ) {
     this.gateData = navParams.data;
     this.gateType = JSON.parse(JSON.stringify(this.gateData.type));
+    this.quditsNumber = JSON.parse(JSON.stringify(this.gateData.quditsNumber));
+    this.quditIndices = Array.from({ length: this.quditsNumber }, (v, i) => i);
+    this.quditIndex = this.quditIndices[0];
   }
 
   ngOnInit() {}
@@ -63,11 +69,15 @@ export class GateDetailsComponent implements OnInit {
           kParameter: this.kParameter
         };
       }
+    } else if (this.gateType === 'Chance') {
+      gatesParameters = {
+        quditIndex: this.quditIndex
+      };
     }
     if (canSaveData) {
-      this.modalController.dismiss(gatesParameters);
+      this.modalController.dismiss(gatesParameters).then();
     } else {
-      this.presentAlert();
+      this.presentAlert().then();
     }
   }
 
